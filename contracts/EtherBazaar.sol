@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./BazCoin.sol";
 
@@ -35,8 +36,13 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     event CancelFeePercentageUpdated(uint256 newFee);
     event BidPlaced(uint256 indexed auctionId, address indexed bidder, uint256 amount);
     
-    constructor(address _bazCoinAddress) {
+    constructor(address _bazCoinAddress) Ownable(msg.sender) {
+        
         bazCoin = BazCoin(_bazCoinAddress);
+    }
+
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     function exchangeBazCoinToEther(uint256 _amount) external onlyOwner {
@@ -61,16 +67,12 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         return AUCTION_CANCEL_FEE_PERCENTAGE;
     }
 
-    modifier onlyOwnerOfTokenAndApproved(address _tokenContract, uint256 _tokenId) {
+    modifier validAuction(address _tokenContract, uint256 _tokenId, uint256 _startTime, uint256 _endTime) {
         IERC721 token = IERC721(_tokenContract);
-        require(token.ownerOf(_tokenId) == msg.sender, "You must be the owner of the token.");
-        require(token.getApproved(_tokenId) == address(this), "Contract must be approved to manage the token.");
-        _;
-    }
-
-    modifier checkTime(uint256 _startTime, uint256 _endTime) {
         require(_startTime > block.timestamp, "Start time must be in the future.");
         require(_endTime > _startTime, "End time must be after start time.");
+        require(token.ownerOf(_tokenId) == msg.sender, "You must be the owner of the token.");
+        require(token.getApproved(_tokenId) == address(this), "Contract must be approved to manage the token.");
         _;
     }
 
@@ -80,11 +82,9 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     }
 
     function startAuction(address _tokenContract, uint256 _tokenId, uint256 _startTime, uint256 _endTime, uint256 _minimumBid) external 
-            onlyOwnerOfTokenAndApproved(_tokenContract, _tokenId) checkTime(_startTime, _endTime) positiveAmount(_minimumBid) return (uint256){
+            validAuction(_tokenContract, _tokenId, _startTime, _endTime) positiveAmount(_minimumBid) returns (uint256) {
 
-        IERC721 token = IERC721(_tokenContract);
-
-        token.safeTransferFrom(msg.sender, address(this), _tokenId);
+        IERC721(_tokenContract).safeTransferFrom(msg.sender, address(this), _tokenId);
 
         auctions[auctionCounter] = Auction({
             tokenContract: _tokenContract,
@@ -162,7 +162,7 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     function cancelAuction(uint256 _auctionId) external onlySeller(_auctionId) auctionNotEnded(_auctionId) approvedCancelFee(_auctionId){
         uint256 cancelFee = auctions[_auctionId].highestBid * AUCTION_CANCEL_FEE_PERCENTAGE / 100;
         // Transfer the fee to the contract
-        bazCoin.transferFrom(msg.sender, address(this), fee);
+        bazCoin.transferFrom(msg.sender, address(this), cancelFee);
 
         Auction storage auction = auctions[_auctionId];
         
