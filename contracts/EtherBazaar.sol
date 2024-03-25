@@ -202,9 +202,8 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         uint256 settleFee = auction.highestBid * AUCTION_SETTLE_FEE_PERCENTAGE / 100;
 
         bazCoin.transfer(auction.seller, auction.highestBid - settleFee);
-
-        IERC721 token = IERC721(auction.tokenContract);
-        token.safeTransferFrom(address(this), auction.highestBidder, auction.tokenId);
+        
+        IERC721(auction.tokenContract).safeTransferFrom(address(this), auction.highestBidder, auction.tokenId);
 
         auction.settled = true;
         emit AuctionSettled(_auctionId, auction.highestBidder, auction.highestBid - settleFee);
