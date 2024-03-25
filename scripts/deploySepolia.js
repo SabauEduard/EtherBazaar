@@ -4,10 +4,17 @@ const { ethers } = require("hardhat");
 async function deploy() {
     [owner] = await ethers.getSigners();
 
-    let tokenFactory = await ethers.getContractFactory("BazCoin");
-    let token = await tokenFactory.connect(owner).deploy();
-    await token.deployed();
-    console.log("ERC20 address: ", token.address)
+    // Deploy BazCoin ERC20 token
+    let bazCoinFactory = await ethers.getContractFactory("BazCoin");
+    let bazCoin = await bazCoinFactory.connect(owner).deploy();
+    await bazCoin.deployed();
+    console.log("BazCoin ERC20 address: ", bazCoin.address);
+
+    // Deploy EtherBazaar contract
+    let etherBazaarFactory = await ethers.getContractFactory("EtherBazaar");
+    let etherBazaar = await etherBazaarFactory.connect(owner).deploy(bazCoin.address);
+    await etherBazaar.deployed();
+    console.log("EtherBazaar contract address: ", etherBazaar.address);
 }
 
 deploy()

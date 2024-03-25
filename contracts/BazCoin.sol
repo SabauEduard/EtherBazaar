@@ -8,15 +8,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract BazCoin is ERC20, Ownable {
     uint256 public constant EXCHANGE_RATE = 1; // 1 ETH = 1 BZC
 
-    event TokensLocked(address indexed user, uint256 amount);
-    event TokensReleased(address indexed user, uint256 amount);
     event AuctionContractSet(address indexed auctionContract);
     event TokensDeposited(address indexed user, uint256 ethAmount, uint256 tokenAmount);
     event TokensWithdrawn(address indexed user, uint256 tokenAmount, uint256 ethAmount);
 
     constructor() ERC20("BazCoin", "BZC") Ownable(msg.sender) {}
 
-    mapping(address => uint256) public lockedTokens;
     address public auctionContract;
     
     function setAuctionContract(address _auctionContract) external onlyOwner {
@@ -35,26 +32,6 @@ contract BazCoin is ERC20, Ownable {
         _;
     }
 
-    modifier enoughBalanceToLock(address user, uint256 tokenAmount) {
-        require(balanceOf(user) >= tokenAmount + lockedTokens[user], "Insufficient balance to lock.");
-        _;
-    }
-
-    function lockTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount(tokenAmount) enoughBalanceToLock(user, tokenAmount) {
-        lockedTokens[user] += tokenAmount;
-        emit TokensLocked(user, tokenAmount);
-    }
-
-    modifier enoughLockedTokens(address user, uint256 tokenAmount) {
-        require(lockedTokens[user] >= tokenAmount, "Insufficient locked tokens.");
-        _;
-    }
-
-    function releaseTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount(tokenAmount) enoughLockedTokens(user, tokenAmount) {
-        lockedTokens[user] -= tokenAmount;
-        emit TokensReleased(user, tokenAmount);
-    }
-
     modifier positiveDeposit() {
         require(msg.value > 0, "Deposit must be greater than 0.");
         _;
@@ -66,12 +43,12 @@ contract BazCoin is ERC20, Ownable {
         emit TokensDeposited(msg.sender, msg.value, tokenAmount);
     }
 
-    modifier enoughBalance(uint256 tokenAmount) {
+    modifier enoughBalance(uint256 tokenAmount, address user) {
         require(tokenAmount <= balanceOf(msg.sender), "Insufficient balance.");
         _;
     }
 
-    function withdraw(uint256 tokenAmount) external enoughBalance(tokenAmount) {
+    function withdraw(uint256 tokenAmount) external enoughBalance(tokenAmount, msg.sender) {
         uint256 ethAmount = tokenAmount / EXCHANGE_RATE;
         _burn(msg.sender, tokenAmount);
         emit TokensWithdrawn(msg.sender, tokenAmount, ethAmount);
