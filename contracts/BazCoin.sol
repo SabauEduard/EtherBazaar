@@ -6,7 +6,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract BazCoin is ERC20, Ownable {
-    uint256 public constant EXCHANGE_RATE = 1000; // 1 ETH = 1000 BZC
+    uint256 public constant EXCHANGE_RATE = 1; // 1 ETH = 1 BZC
 
     event TokensLocked(address indexed user, uint256 amount);
     event TokensReleased(address indexed user, uint256 amount);
@@ -40,7 +40,7 @@ contract BazCoin is ERC20, Ownable {
         _;
     }
 
-    function lockTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount enoughBalanceToLock(user, tokenAmount) {
+    function lockTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount(tokenAmount) enoughBalanceToLock(user, tokenAmount) {
         lockedTokens[user] += tokenAmount;
         emit TokensLocked(user, tokenAmount);
     }
@@ -50,7 +50,7 @@ contract BazCoin is ERC20, Ownable {
         _;
     }
 
-    function releaseTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount enoughLockedTokens(user, tokenAmount) {
+    function releaseTokens(address user, uint256 tokenAmount) external onlyAuctionContract positiveAmount(tokenAmount) enoughLockedTokens(user, tokenAmount) {
         lockedTokens[user] -= tokenAmount;
         emit TokensReleased(user, tokenAmount);
     }
