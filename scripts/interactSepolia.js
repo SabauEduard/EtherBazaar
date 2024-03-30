@@ -4,13 +4,13 @@ const { ethers } = require("hardhat");
 async function deploy() {
     [owner, user1, user2] = await ethers.getSigners();
 
-    let deployedTokenAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+    let deployedTokenAddress = "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00"
     let token = await ethers.getContractAt("BazCoin", deployedTokenAddress)
 
-    let deployedBazaarAddress = "0x610178dA211FEF7D417bC0e6FeD39F05609AD788";
+    let deployedBazaarAddress = "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570";
     let bazaar = await ethers.getContractAt("EtherBazaar", deployedBazaarAddress);
 
-    let deployedNFTAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+    let deployedNFTAddress = "0x809d550fca64d94Bd9F66E60752A544199cfAC3D";
     let nft = await ethers.getContractAt("TestNFT", deployedNFTAddress);
 
     // Giving the owner a nft;
@@ -19,16 +19,14 @@ async function deploy() {
     console.log("Owner minted a NFT");
 
     // Owner approves the bazaar to spend the NFT
-    tx = await nft.connect(owner).approve(bazaar.address, 0);
+    tx = await nft.connect(owner).approve(bazaar.address, 1);
     receipt = tx.wait();
     console.log("Owner approved the bazaar to spend the NFT");
-    console.log(receipt.events[0]);
 
     // Owner puts the NFT for sale
-    tx = await bazaar.connect(owner).startAuction(nft.address, 0, 5, 120, 5);
+    tx = await bazaar.connect(owner).startAuction(nft.address, 1, 0, 120, 5);
     receipt = tx.wait();
     console.log("Owner put the NFT for sale");
-    console.log(receipt.events[0]);
 
     // User1 deposits 500 tokens
     overwrite = {
@@ -37,14 +35,12 @@ async function deploy() {
     tx = await token.connect(user1).deposit(overwrite);
     receipt = tx.wait();
     console.log("User1 deposited 500 tokens");
-    console.log(receipt.events[0]);
 
     // User1 bids 200 tokens
     tx = await token.connect(user1).approve(bazaar.address, 200);
-    tx = await bazaar.connect(user1).bid(0, 200);
+    tx = await bazaar.connect(user1).placeBid(0, 200);
     receipt = tx.wait();
     console.log("User1 bid 200 tokens");
-    console.log(receipt.events[0]);
 
     // User2 deposits 1000 tokens
     overwrite = {
@@ -53,11 +49,10 @@ async function deploy() {
     tx = await token.connect(user2).deposit(overwrite);
     receipt = tx.wait();
     console.log("User2 deposited 1000 tokens");
-    console.log(receipt.events[0]);
 
     // User2 bids 300 tokens
     tx = await token.connect(user2).approve(bazaar.address, 300);
-    tx = await bazaar.connect(user2).bid(0, 300);
+    tx = await bazaar.connect(user2).placeBid(0, 300);
     receipt = tx.wait();
     console.log("User2 bid 300 tokens");
 
@@ -66,14 +61,6 @@ async function deploy() {
     tx = await bazaar.connect(user2).addToBid(0, 100);
     receipt = tx.wait();
     console.log("User2 added 100 tokens to the bid");
-    console.log(receipt.events[0]);
-
-    // User1 tries to bid 300 tokens
-    tx = await token.connect(user1).approve(bazaar.address, 300);
-    tx = await bazaar.connect(user1).bid(0, 300);
-    receipt = tx.wait();
-    console.log("User1 tried to bid 300 tokens");
-    console.log(receipt.events[0]);
 
     // Owner looks at the auction
     tx = await bazaar.connect(owner).seeAuction(0);
