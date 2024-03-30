@@ -15,6 +15,12 @@ async function deploy() {
     let etherBazaar = await etherBazaarFactory.connect(owner).deploy(bazCoin.address);
     await etherBazaar.deployed();
     console.log("EtherBazaar contract address: ", etherBazaar.address);
+
+    // Deploy TestNFT contract
+    let testNFTFactory = await ethers.getContractFactory("TestNFT");
+    let testNFT = await testNFTFactory.connect(owner).deploy();
+    await testNFT.deployed();
+    console.log("TestNFT contract address: ", testNFT.address);
 }
 
 deploy()
