@@ -21,7 +21,7 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     }
 
     mapping(uint256 => Auction) public auctions;
-    mapping(address => uint256[]) public userAuctions; // Maps user to their auctions (for easy retrieval of all auctions a user has created)
+    mapping(address => uint256[]) public userAuctions; // Maps users to their auctions (for easy retrieval of all auctions a user has created)
     uint256 public auctionCounter;
     uint256 public AUCTION_SETTLE_FEE_PERCENTAGE = 5; // % fee that is taken from the winner's bid when the auction ends
     uint256 public AUCTION_CANCEL_FEE_PERCENTAGE = 2; // % of the current highest bid that the seller has to pay to cancel the auction
@@ -55,17 +55,9 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         emit SettleFeePercentageUpdated(_newFee);
     }
 
-    function seeAuctionFeePercentage() external view returns(uint256) {
-        return AUCTION_SETTLE_FEE_PERCENTAGE;
-    }
-
     function updateCancelFeePercentage(uint256 _newFee) external onlyOwner {
         AUCTION_CANCEL_FEE_PERCENTAGE = _newFee;
         emit CancelFeePercentageUpdated(_newFee);
-    }
-
-    function seeCancelFeePercentage() external view returns(uint256) {
-        return AUCTION_CANCEL_FEE_PERCENTAGE;
     }
 
     modifier validAuction(address _tokenContract, uint256 _tokenId, uint256 _startTimeMinutes, uint256 _endTimeMinutes) {
@@ -104,10 +96,6 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         userAuctions[msg.sender].push(auctionCounter);
 
         return auctionCounter - 1;
-    }
-
-    function seeAuction(uint256 _auctionId) external view returns(Auction memory) {
-        return auctions[_auctionId];
     }
 
     function seeUserAuctions(address _user) external view returns(uint256[] memory) {
