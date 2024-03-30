@@ -68,10 +68,9 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         return AUCTION_CANCEL_FEE_PERCENTAGE;
     }
 
-    modifier validAuction(address _tokenContract, uint256 _tokenId, uint256 _startTime, uint256 _endTime) {
+    modifier validAuction(address _tokenContract, uint256 _tokenId, uint256 _startTimeMinutes, uint256 _endTimeMinutes) {
         IERC721 token = IERC721(_tokenContract);
-        require(_startTime > block.timestamp, "Start time must be in the future.");
-        require(_endTime > _startTime, "End time must be after start time.");
+        require(_endTimeMinutes > _startTimeMinutes, "End time must be after start time.");
         require(token.ownerOf(_tokenId) == msg.sender, "You must be the owner of the token.");
         require(token.getApproved(_tokenId) == address(this), "Contract must be approved to manage the token.");
         _;
@@ -82,8 +81,8 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         _;
     }
 
-    function startAuction(address _tokenContract, uint256 _tokenId, uint256 _startTime, uint256 _endTime, uint256 _minimumBid) external 
-            validAuction(_tokenContract, _tokenId, _startTime, _endTime) positiveAmount(_minimumBid) returns (uint256) {
+    function startAuction(address _tokenContract, uint256 _tokenId, uint256 _startTimeMinutes, uint256 _endTimeMinutes, uint256 _minimumBid) external 
+            validAuction(_tokenContract, _tokenId, _startTimeMinutes, _endTimeMinutes) positiveAmount(_minimumBid) returns (uint256) {
 
         IERC721(_tokenContract).safeTransferFrom(msg.sender, address(this), _tokenId);
 
@@ -91,15 +90,15 @@ contract EtherBazaar is IERC721Receiver, Ownable {
             tokenContract: _tokenContract,
             tokenId: _tokenId,
             seller: msg.sender,
-            startTime: _startTime,
-            endTime: _endTime,
+            startTime: block.timestamp + _startTimeMinutes * 60,
+            endTime: block.timestamp + _endTimeMinutes * 60,
             minimumBid: _minimumBid,
             highestBidder: address(0),
             highestBid: 0,
             settled: false
         });
 
-        emit AuctionCreated(auctionCounter, _tokenContract, _tokenId, msg.sender, _startTime, _endTime, _minimumBid);
+        emit AuctionCreated(auctionCounter, _tokenContract, _tokenId, msg.sender, auctions[auctionCounter].startTime , auctions[auctionCounter].endTime, _minimumBid);
 
         auctionCounter++;
         userAuctions[msg.sender].push(auctionCounter);
