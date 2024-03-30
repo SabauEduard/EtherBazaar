@@ -128,12 +128,16 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     modifier checkBid(uint256 _auctionId, uint256 _bidAmount) {
         require(_bidAmount > auctions[_auctionId].highestBid, "Bid amount must be greater than the highest bid.");
         require(_bidAmount >= auctions[_auctionId].minimumBid, "Bid amount must be greater than the minimum bid.");
-        require(bazCoin.allowance(msg.sender, address(this)) >= _bidAmount, "You must approve the bid amount.");
+        _;
+    }
+
+    modifier approvedBid(uint256 _auctionId, uint256 _bidAmount) {
+        require(bazCoin.allowance(msg.sender, address(this)) >= _bidAmount, "Bid amount must be approved.");
         _;
     }
 
     function placeBid(uint256 _auctionId, uint256 _bidAmount) external positiveAmount(_bidAmount) auctionStarted(_auctionId) 
-            auctionNotEnded(_auctionId) checkBid(_auctionId, _bidAmount) {
+            auctionNotEnded(_auctionId) checkBid(_auctionId, _bidAmount) approvedBid(_auctionId, _bidAmount) {
         Auction storage auction = auctions[_auctionId];
 
         // If there was a previous bid, return the funds to the previous bidder
@@ -148,6 +152,21 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         auction.highestBid = _bidAmount;
 
         emit BidPlaced(_auctionId, msg.sender, _bidAmount);
+    }
+
+    modifier highestBidder(uint256 _auctionId) {
+        require(msg.sender == auctions[_auctionId].highestBidder, "You must be the highest bidder to do this.");
+        _;
+    }
+
+    function addToBid(uint256 _auctionId, uint256 _bidAmount) external highestBidder(_auctionId) positiveAmount(_bidAmount) auctionStarted(_auctionId) 
+            auctionNotEnded(_auctionId) approvedBid(_auctionId, _bidAmount) {
+        Auction storage auction = auctions[_auctionId];
+
+        bazCoin.transferFrom(msg.sender, address(this), _bidAmount);
+        auction.highestBid += _bidAmount;
+
+        emit BidPlaced(_auctionId, msg.sender, auction.highestBid);
     }
 
     modifier onlySeller(uint256 _auctionId) {
