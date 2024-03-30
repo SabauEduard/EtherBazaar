@@ -14,19 +14,6 @@ contract BazCoin is ERC20, Ownable {
 
     constructor() ERC20("BazCoin", "BZC") Ownable(msg.sender) {}
 
-    address public auctionContract;
-    
-    function setAuctionContract(address _auctionContract) external onlyOwner {
-        require(auctionContract == address(0), "Auction contract address already set");
-        auctionContract = _auctionContract;
-        emit AuctionContractSet(_auctionContract);
-    }
-
-    modifier onlyAuctionContract() {
-        require(msg.sender == auctionContract, "Caller is not the auction contract");
-        _;
-    }
-
     modifier positiveAmount(uint256 tokenAmount) {
         require(tokenAmount > 0, "Token Amount must be greater than 0.");
         _;

@@ -46,8 +46,8 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         return this.onERC721Received.selector;
     }
 
-    function exchangeBazCoinToEther(uint256 _amount) external onlyOwner {
-        bazCoin.withdraw(_amount);
+    function withdraw(uint256 _amount) external onlyOwner {
+        bazCoin.transfer(msg.sender, _amount);
     }
 
     function updateAuctionFeePercentage(uint256 _newFee) external onlyOwner {
