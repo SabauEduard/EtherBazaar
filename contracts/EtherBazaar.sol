@@ -28,7 +28,7 @@ contract EtherBazaar is IERC721Receiver, Ownable {
 
     BazCoin public bazCoin;
 
-    event AuctionCreated(uint256 indexed auctionId, address tokenContract, uint256 indexed tokenId, address indexed seller, uint256 startTime, uint256 endTime, uint256 minimumBid);
+    event AuctionCreated(uint256 indexed auctionId, address tokenContract, uint256 indexed tokenId, address indexed seller);
     event AuctionEnded(uint256 indexed auctionId, address indexed winner, uint256 amount);
     event AuctionCancelled(uint256 indexed auctionId, address indexed seller, uint256 amount);
     event AuctionSettledWithWinner(uint256 indexed auctionId, address indexed winner, uint256 amount);
@@ -98,7 +98,7 @@ contract EtherBazaar is IERC721Receiver, Ownable {
             settled: false
         });
 
-        emit AuctionCreated(auctionCounter, _tokenContract, _tokenId, msg.sender, auctions[auctionCounter].startTime , auctions[auctionCounter].endTime, _minimumBid);
+        emit AuctionCreated(auctionCounter, _tokenContract, _tokenId, msg.sender);
 
         auctionCounter++;
         userAuctions[msg.sender].push(auctionCounter);
