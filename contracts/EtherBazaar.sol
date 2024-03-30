@@ -31,7 +31,8 @@ contract EtherBazaar is IERC721Receiver, Ownable {
     event AuctionCreated(uint256 indexed auctionId, address tokenContract, uint256 indexed tokenId, address indexed seller, uint256 startTime, uint256 endTime, uint256 minimumBid);
     event AuctionEnded(uint256 indexed auctionId, address indexed winner, uint256 amount);
     event AuctionCancelled(uint256 indexed auctionId, address indexed seller, uint256 amount);
-    event AuctionSettled(uint256 indexed auctionId, address indexed winner, uint256 amount);
+    event AuctionSettledWithWinner(uint256 indexed auctionId, address indexed winner, uint256 amount);
+    event AuctionSettledWithoutWinner(uint256 indexed auctionId);
     event SettleFeePercentageUpdated(uint256 newFee);
     event CancelFeePercentageUpdated(uint256 newFee);
     event BidPlaced(uint256 indexed auctionId, address indexed bidder, uint256 amount);
@@ -197,7 +198,18 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         _;
     }
 
-    function settleAuction(uint256 _auctionId) external onlySellerOrHighestBidder(_auctionId) auctionNotSettled(_auctionId) auctionEnded(_auctionId) {
+    function transferNFTToSeller(uint256 _auctionId) private {
+        // Transfer the NFT back to the seller
+        Auction storage auction = auctions[_auctionId];
+
+        IERC721(auction.tokenContract).safeTransferFrom(address(this), auction.seller, auction.tokenId);
+
+        auction.settled = true;
+        emit AuctionSettledWithoutWinner(_auctionId);
+    }
+
+    function transferNFTToWinner(uint256 _auctionId) private {
+        // Transfer the NFT to the highest bidder
         Auction storage auction = auctions[_auctionId];
         uint256 settleFee = auction.highestBid * AUCTION_SETTLE_FEE_PERCENTAGE / 100;
 
@@ -206,6 +218,17 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         IERC721(auction.tokenContract).safeTransferFrom(address(this), auction.highestBidder, auction.tokenId);
 
         auction.settled = true;
-        emit AuctionSettled(_auctionId, auction.highestBidder, auction.highestBid - settleFee);
+        emit AuctionSettledWithWinner(_auctionId, auction.highestBidder, auction.highestBid - settleFee);
+
+    }
+
+    function settleAuction(uint256 _auctionId) external onlySellerOrHighestBidder(_auctionId) auctionNotSettled(_auctionId) auctionEnded(_auctionId) {
+        Auction storage auction = auctions[_auctionId];
+
+        if(auction.highestBidder == address(0)) {
+            transferNFTToSeller(_auctionId);
+        } else {
+            transferNFTToWinner(_auctionId);
+        }
     }
 }
