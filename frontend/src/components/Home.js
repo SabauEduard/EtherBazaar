@@ -1,9 +1,11 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { useWallet } from "../utils/Context";
-import { connectWalletMetamask } from "../utils/EthersUtils";
+import { useEthersUtils } from "../utils/EthersUtils";
+import { Wallet } from "./Wallet";
 
 export const Home = () => {
   const { initializeWallet } = useWallet();
+  const { connectWalletMetamask } = useEthersUtils();
 
   const accountChangedHandler = async (signer) => {
     initializeWallet(signer);
@@ -24,6 +26,7 @@ export const Home = () => {
       <Text fontSize={60} fontWeight={700}>
         Ether Bazaar
       </Text>
+      <Wallet />
       <Button onClick={handleConnectMetaMaskButtonClick} colorScheme="twitter">
         Connect with Metamask
       </Button>

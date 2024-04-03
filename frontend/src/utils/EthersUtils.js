@@ -1,42 +1,51 @@
+import { useEffect, useState } from "react";
+
 const ethers = require("ethers");
 
-const provider = new ethers.BrowserProvider(window.ethereum);
+export const useEthersUtils = () => {
+  const [provider, setProvider] = useState(null);
 
-const connectWalletMetamask = (accountChangedHandler) => {
-  if (window.ethereum) {
-    provider
-      .send("eth_requestAccounts", [])
-      .then(async () => {
-        provider.getSigner().then(async (account) => {
-          accountChangedHandler(account);
+  useEffect(() => {
+    const ethProvider = new ethers.BrowserProvider(window.ethereum);
+    setProvider(ethProvider);
+  }, []);
+
+  const connectWalletMetamask = (accountChangedHandler) => {
+    if (window.ethereum) {
+      provider
+        .send("eth_requestAccounts", [])
+        .then(async () => {
+          provider.getSigner().then(async (account) => {
+            accountChangedHandler(account);
+          });
+        })
+        .catch(async () => {
+          console.log("err");
         });
-      })
-      .catch(async () => {
-        console.log("err");
-      });
-  } else {
-    console.log("err");
-  }
-};
+    } else {
+      console.log("err");
+    }
+  };
 
-const getBalance = (address) => {
-  return provider.getBalance(address);
-};
+  const getBalance = (address) => {
+    return provider.getBalance(address);
+  };
 
-const sendTransaction = async (sender, to, amount) => {
-  console.log("sender: " + sender.provider);
-  console.log("amount " + ethers.parseUnits(amount.toString(), "wei"));
-  const transactionResponse = await sender.sendTransaction({
-    to,
-    value: ethers.parseUnits(amount.toString(), "wei"),
-  });
+  const sendTransaction = async (sender, to, amount) => {
+    console.log("sender: " + sender.provider);
+    console.log("amount " + ethers.parseUnits(amount.toString(), "wei"));
+    const transactionResponse = await sender.sendTransaction({
+      to,
+      value: ethers.parseUnits(amount.toString(), "wei"),
+    });
 
-  return transactionResponse.hash;
-};
+    return transactionResponse.hash;
+  };
 
-module.exports = {
-  provider,
-  sendTransaction,
-  getBalance,
-  connectWalletMetamask,
+  return {
+    provider,
+    sendTransaction,
+    getBalance,
+    connectWalletMetamask,
+  };
 };
