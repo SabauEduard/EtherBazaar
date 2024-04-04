@@ -1,13 +1,40 @@
 import { useEffect, useState } from "react";
-
+import BazCoinABI from "../../../contracts/BazCoinABI.json";
+import EtherBazaarABI from "../../../contracts/EtherBazaarABI.json";
 const ethers = require("ethers");
+
+/*
+FLOW:
+  - deposit in bazcoin
+  - allowance la contract cu amount-ul cat vreau sa licitez
+  - licitez si contractul transfera bazcoinu in contul celuilalt
+*/
 
 export const useEthersUtils = () => {
   const [provider, setProvider] = useState(null);
+  const [bazcoinContract, setBazcoinContract] = useState(null);
+  const [etherBazzarContract, setEtherBazaarContract] = useState(null);
 
   useEffect(() => {
     const ethProvider = new ethers.BrowserProvider(window.ethereum);
     setProvider(ethProvider);
+
+    //need some help here
+    const contractAddress = "YOUR_CONTRACT_ADDRESS";
+    const contractInstance = new ethers.Contract(
+      contractAddress,
+      BazCoinABI,
+      ethProvider.getSigner()
+    );
+    setBazcoinContract(contractInstance);
+
+    const contractAddress2 = "YOUR_CONTRACT_ADDRESS";
+    const contractInstance2 = new ethers.Contract(
+      contractAddress2,
+      EtherBazaarABI,
+      ethProvider.getSigner()
+    );
+    setEtherBazaarContract(contractInstance2);
   }, []);
 
   const connectWalletMetamask = (accountChangedHandler) => {
@@ -43,6 +70,8 @@ export const useEthersUtils = () => {
   };
 
   return {
+    bazcoinContract,
+    etherBazzarContract,
     provider,
     sendTransaction,
     getBalance,
