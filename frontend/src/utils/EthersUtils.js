@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import BazCoinABI from "../../../contracts/BazCoinABI.json";
 import EtherBazaarABI from "../../../contracts/EtherBazaarABI.json";
+import TestNFTABI from "../../../contracts/TestNFTABI.json";
 const ethers = require("ethers");
 
 /*
@@ -14,6 +15,7 @@ export const useEthersUtils = () => {
   const [provider, setProvider] = useState(null);
   const [bazcoinContract, setBazcoinContract] = useState(null);
   const [etherBazzarContract, setEtherBazaarContract] = useState(null);
+  const [nftContract, setNftContract] = useState(null);
 
   useEffect(() => {
     const ethProvider = new ethers.BrowserProvider(window.ethereum);
@@ -35,6 +37,14 @@ export const useEthersUtils = () => {
       ethProvider.getSigner()
     );
     setEtherBazaarContract(contractInstance2);
+
+    const contractAddress3 = "YOUR_CONTRACT_ADDRESS";
+    const contractInstance3 = new ethers.Contract(
+      contractAddress3,
+      TestNFTABI,
+      ethProvider.getSigner()
+    );
+    setNftContract(contractInstance3);
   }, []);
 
   const connectWalletMetamask = (accountChangedHandler) => {
@@ -72,6 +82,7 @@ export const useEthersUtils = () => {
   return {
     bazcoinContract,
     etherBazzarContract,
+    nftContract,
     provider,
     sendTransaction,
     getBalance,
