@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import BazCoinABI from "../../../contracts/BazCoinABI.json";
-import EtherBazaarABI from "../../../contracts/EtherBazaarABI.json";
-import TestNFTABI from "../../../contracts/TestNFTABI.json";
+import BazCoinABI from "../contractsABI/BazCoinABI.json";
+import EtherBazaarABI from "../contractsABI/EtherBazaarABI.json";
+import TestNFTABI from "../contractsABI/TestNFTABI.json";
 const ethers = require("ethers");
 
 /*

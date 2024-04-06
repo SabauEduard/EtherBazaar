@@ -37,7 +37,7 @@ export const Profile = () => {
     console.log("Owner approved the bazaar to spend the NFT");
 
     // Owner puts the NFT for sale
-    tx = await bazaarContract
+    tx = await etherBazzarContract
       .connect(owner)
       .startAuction(nftContract.address, 1, 0, 120, 5);
     receiptt = await tx.wait();
