@@ -4,13 +4,6 @@ import EtherBazaarABI from "../contractsABI/EtherBazaarABI.json";
 import TestNFTABI from "../contractsABI/TestNFTABI.json";
 const ethers = require("ethers");
 
-/*
-FLOW:
-  - deposit in bazcoin
-  - allowance la contract cu amount-ul cat vreau sa licitez
-  - licitez si contractul transfera bazcoinu in contul celuilalt
-*/
-
 export const useEthersUtils = () => {
   const [provider, setProvider] = useState(null);
   const [bazcoinContract, setBazcoinContract] = useState(null);
@@ -21,7 +14,6 @@ export const useEthersUtils = () => {
     const ethProvider = new ethers.BrowserProvider(window.ethereum);
     setProvider(ethProvider);
 
-    //need some help here
     const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const contractInstance = new ethers.Contract(
       contractAddress,

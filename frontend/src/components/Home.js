@@ -1,20 +1,22 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
-import { useWallet } from "../utils/Context";
-import { useEthersUtils } from "../utils/EthersUtils";
-import { Wallet } from "./Wallet";
 import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const nav = useNavigate();
-  const { initializeWallet } = useWallet();
-  const { connectWalletMetamask } = useEthersUtils();
 
-  const accountChangedHandler = async (signer) => {
-    initializeWallet(signer);
-  };
-
-  const handleConnectMetaMaskButtonClick = () => {
+  const handleConnectMetaMaskButtonClick = async () => {
     connectWalletMetamask(accountChangedHandler);
+
+    if (window.ethereum) {
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        nav("/bazar");
+      } catch (error) {
+        console.error("Failed to connect metamask wallet", error);
+      }
+    } else {
+      alert("Please install MetaMask!");
+    }
   };
 
   return (
@@ -28,7 +30,6 @@ export const Home = () => {
       <Text fontSize={60} fontWeight={700}>
         Ether Bazaar
       </Text>
-      <Wallet />
       <Flex gap={10}>
         <Button
           onClick={handleConnectMetaMaskButtonClick}

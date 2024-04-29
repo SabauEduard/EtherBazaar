@@ -1,18 +1,24 @@
-import { Flex, Button } from "@chakra-ui/react";
-import { useEthersUtils } from "../utils/EthersUtils";
+import { Flex, Button, Input } from "@chakra-ui/react";
 import { useState } from "react";
+import {
+  bazcoinContract,
+  bazarContract,
+  nftContract,
+} from "../utils/ethersConnect";
 
 export const Profile = () => {
-  const { bazcoinContract, etherBazzarContract, nftContract, provider } =
-    useEthersUtils();
-  const [receipt, setReceipt] = useState(null);
+  const [depositSum, setDepositSum] = useState("");
+  const [owner, user1, user2] = ethers.getSigners();
 
   const handleDepositBazcoin = async () => {
     if (bazcoinContract) {
       try {
-        await bazcoinContract.deposit();
+        await bazcoinContract.connect(user1).deposit({
+          value: depositSum,
+        });
+        console.log("All good deposit");
       } catch (error) {
-        console.log("Error on deposit bazCoin");
+        console.log("Error on deposit");
       }
     } else {
       console.log("There is no contract here.");
@@ -20,30 +26,22 @@ export const Profile = () => {
   };
 
   const handleSaleNFT = async () => {
-    const [owner] = await provider.listAccounts();
-
     //Giving the owner a NFT
-    let tx = await nftContract.connect(owner).mint(owner);
-    let receiptt = await tx.wait();
-    setReceipt(receiptt);
+    let tx = await nftContract.connect(owner).mint(owner.address);
+
     console.log("Owner minted a NFT");
 
     // Owner approves the bazaar to spend the NFT
-    tx = await nftContract
-      .connect(owner)
-      .approve(etherBazzarContract.address, 1);
-    receiptt = await tx.wait();
-    setReceipt(receiptt);
+    tx = await nftContract.connect(owner).approve(bazarContract.address, 1);
+
     console.log("Owner approved the bazaar to spend the NFT");
 
     // Owner puts the NFT for sale
-    tx = await etherBazzarContract
+    tx = await bazarContract
       .connect(owner)
       .startAuction(nftContract.address, 1, 0, 120, 5);
-    receiptt = await tx.wait();
-    setReceipt(receiptt);
+
     console.log("Owner put the NFT for sale");
-    console.log(receiptt.logs[0].data);
   };
 
   return (
@@ -55,12 +53,20 @@ export const Profile = () => {
       direction={"column"}
     >
       <Button colorScheme="twitter" onClick={handleSaleNFT}>
-        Sale NFT 🤑
+        Sell NFT
       </Button>
 
-      <Button colorScheme="twitter" onClick={handleDepositBazcoin}>
-        Deposit BazCoin
-      </Button>
+      <Flex gap={5}>
+        <Button colorScheme="twitter" onClick={handleDepositBazcoin}>
+          Deposit BazCoin
+        </Button>
+        <Input
+          value={depositSum}
+          onChange={(e) => {
+            setDepositSum(e.target.value);
+          }}
+        />
+      </Flex>
     </Flex>
   );
 };
