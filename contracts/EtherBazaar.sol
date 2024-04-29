@@ -118,12 +118,17 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         _;
     }
 
+    modifier checkAuctionExists(uint256 _auctionId) {
+        require(auctions[_auctionId].seller != address(0), "Auction does not exist.");
+        _;
+    }
+
     modifier approvedBid(uint256 _auctionId, uint256 _bidAmount) {
         require(bazCoin.allowance(msg.sender, address(this)) >= _bidAmount, "Bid amount must be approved.");
         _;
     }
 
-    function placeBid(uint256 _auctionId, uint256 _bidAmount) external positiveAmount(_bidAmount) auctionStarted(_auctionId) 
+    function placeBid(uint256 _auctionId, uint256 _bidAmount) external checkAuctionExists(_auctionId) positiveAmount(_bidAmount) auctionStarted(_auctionId) 
             auctionNotEnded(_auctionId) checkBid(_auctionId, _bidAmount) approvedBid(_auctionId, _bidAmount) {
         Auction storage auction = auctions[_auctionId];
 

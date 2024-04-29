@@ -22,7 +22,7 @@ export const useEthersUtils = () => {
     setProvider(ethProvider);
 
     //need some help here
-    const contractAddress = "YOUR_CONTRACT_ADDRESS";
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
     const contractInstance = new ethers.Contract(
       contractAddress,
       BazCoinABI,
@@ -30,7 +30,7 @@ export const useEthersUtils = () => {
     );
     setBazcoinContract(contractInstance);
 
-    const contractAddress2 = "YOUR_CONTRACT_ADDRESS";
+    const contractAddress2 = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
     const contractInstance2 = new ethers.Contract(
       contractAddress2,
       EtherBazaarABI,
@@ -38,7 +38,7 @@ export const useEthersUtils = () => {
     );
     setEtherBazaarContract(contractInstance2);
 
-    const contractAddress3 = "YOUR_CONTRACT_ADDRESS";
+    const contractAddress3 = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
     const contractInstance3 = new ethers.Contract(
       contractAddress3,
       TestNFTABI,
