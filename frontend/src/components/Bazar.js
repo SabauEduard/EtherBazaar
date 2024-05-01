@@ -1,6 +1,8 @@
-import { Flex, Text } from "@chakra-ui/react";
+import { Flex, Text, Button } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 export const Bazar = () => {
+  const nav = useNavigate();
   return (
     <Flex
       flex={1}
@@ -14,6 +16,14 @@ export const Bazar = () => {
       </Text>
 
       <Text>Welcome to bazar</Text>
+
+      <Button
+        onClick={() => {
+          nav("/profile");
+        }}
+      >
+        Profile
+      </Button>
     </Flex>
   );
 };

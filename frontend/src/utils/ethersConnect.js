@@ -24,4 +24,4 @@ const nftContract = new ethers.Contract(
   signer
 );
 
-export { bazcoinContract, bazarContract, nftContract };
+export { bazcoinContract, bazarContract, nftContract, provider };

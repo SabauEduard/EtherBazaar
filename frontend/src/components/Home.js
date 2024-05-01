@@ -5,8 +5,6 @@ export const Home = () => {
   const nav = useNavigate();
 
   const handleConnectMetaMaskButtonClick = async () => {
-    connectWalletMetamask(accountChangedHandler);
-
     if (window.ethereum) {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
