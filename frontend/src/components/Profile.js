@@ -5,6 +5,7 @@ import {
   bazarContract,
   nftContract,
   provider,
+  signer,
 } from "../utils/ethersConnect";
 
 export const Profile = () => {
@@ -28,23 +29,22 @@ export const Profile = () => {
   };
 
   const handleSaleNFT = async () => {
-    const [owner, user1, user2] = await provider.listAccounts();
-    console.log(owner);
+    console.log(signer);
     console.log(bazarContract);
     //Giving the owner a NFT
-    let tx = await nftContract.connect(owner).mint(owner.address);
+    let tx = await nftContract.mint(signer.address);
+    await tx.wait();
 
     console.log("Owner minted a NFT");
 
     // Owner approves the bazaar to spend the NFT
-    tx = await nftContract.connect(owner).approve(bazarContract.target, 1);
-
+    tx = await nftContract.approve(bazarContract.target, 1);
+    await tx.wait();
     console.log("Owner approved the bazaar to spend the NFT");
 
     // Owner puts the NFT for sale
-    tx = await bazarContract
-      .connect(owner)
-      .startAuction(nftContract.target, 1, 0, 120, 5);
+    tx = await bazarContract.startAuction(nftContract.target, 1, 0, 120, 5);
+    await tx.wait();
 
     console.log("Owner put the NFT for sale");
   };

@@ -4,13 +4,13 @@ const { ethers } = require("hardhat");
 async function deploy() {
     [owner, user1, user2] = await ethers.getSigners();
 
-    let deployedTokenAddress = "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
+    let deployedTokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     let token = await ethers.getContractAt("BazCoin", deployedTokenAddress)
 
-    let deployedBazaarAddress = "0x59b670e9fA9D0A427751Af201D676719a970857b";
+    let deployedBazaarAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
     let bazaar = await ethers.getContractAt("EtherBazaar", deployedBazaarAddress);
 
-    let deployedNFTAddress = "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1";
+    let deployedNFTAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
     let nft = await ethers.getContractAt("TestNFT", deployedNFTAddress);
 
     // Giving the owner a nft;
@@ -67,10 +67,6 @@ async function deploy() {
     receipt = await tx.wait();
     console.log("User2 added 100 tokens to the bid");
     console.log(receipt.logs[0].data);
-
-    // Owner looks at the auction
-    tx = await bazaar.connect(owner).seeAuction(0);
-    console.log("Owner looked at the auction");
 }
 
 deploy()
