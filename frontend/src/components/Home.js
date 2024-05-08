@@ -1,5 +1,6 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+const ethers = require("ethers");
 
 export const Home = () => {
   const nav = useNavigate();
@@ -7,7 +8,8 @@ export const Home = () => {
   const handleConnectMetaMaskButtonClick = async () => {
     if (window.ethereum) {
       try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
         nav("/bazar");
       } catch (error) {
         console.error("Failed to connect metamask wallet", error);

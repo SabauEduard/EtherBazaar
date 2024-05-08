@@ -18,6 +18,18 @@ async function deploy() {
     receipt = await tx.wait();
     console.log("Owner minted a NFT");
 
+    // Giving nfts to users
+    tx = await nft.connect(owner).mint(user1.address);
+    receipt = await tx.wait();
+    tx= await nft.connect(owner).mint(user2.address);
+    receipt = await tx.wait();
+    console.log("Owner minted NFTs for users");
+
+    // See owner's nfts
+    let nfts = await nft.connect(owner).getOwnedNfts(owner.address);
+    console.log("Owner's NFTs: ")
+    console.log(nfts)
+
     // Owner approves the bazaar to spend the NFT
     tx = await nft.connect(owner).approve(bazaar.address, 1);
     receipt = await tx.wait();
@@ -28,6 +40,12 @@ async function deploy() {
     receipt = await tx.wait();
     console.log("Owner put the NFT for sale");
     console.log(receipt.logs[0].data);
+
+    // See the NFTs for sale
+    let auctions = await bazaar.seeValidAuctions();
+    console.log("Auctions: ")
+    console.log(auctions)
+
 
     // User1 deposits 500 tokens
     overwrite = {

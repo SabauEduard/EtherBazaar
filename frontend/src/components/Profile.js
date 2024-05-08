@@ -31,8 +31,13 @@ export const Profile = () => {
   const handleSaleNFT = async () => {
     console.log(signer);
     console.log(bazarContract);
+
+    let tx = await nftContract.getTokenIds();
+    console.log(tx);
+
+    
     //Giving the owner a NFT
-    let tx = await nftContract.mint(signer.address);
+    tx = await nftContract.mint(signer.address);
     await tx.wait();
 
     console.log("Owner minted a NFT");

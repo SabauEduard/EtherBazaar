@@ -102,6 +102,25 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         return userAuctions[_user];
     }
 
+    function seeValidAuctions() external view returns(uint256[] memory) {
+        uint256[] memory validAuctionsArray = new uint256[](auctionCounter);
+        uint256 validAuctionsCounter = 0;
+
+        for(uint256 i = 0; i < auctionCounter; i++) {
+            if(block.timestamp >= auctions[i].startTime && block.timestamp < auctions[i].endTime && !auctions[i].settled) {
+                validAuctionsArray[validAuctionsCounter] = i;
+                validAuctionsCounter++;
+            }
+        }
+
+        uint256[] memory validAuctionsArrayFinal = new uint256[](validAuctionsCounter);
+        for(uint256 i = 0; i < validAuctionsCounter; i++) {
+            validAuctionsArrayFinal[i] = validAuctionsArray[i];
+        }
+
+        return validAuctionsArrayFinal;
+    }
+
     modifier auctionStarted(uint256 _auctionId) {
         require(block.timestamp >= auctions[_auctionId].startTime, "Auction has not started yet.");
         _;
