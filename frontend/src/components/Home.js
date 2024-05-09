@@ -9,7 +9,7 @@ export const Home = () => {
     if (window.ethereum) {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
-        await provider.send('eth_requestAccounts', []);
+        await provider.send("eth_requestAccounts", []);
         nav("/bazar");
       } catch (error) {
         console.error("Failed to connect metamask wallet", error);
@@ -34,6 +34,7 @@ export const Home = () => {
         <Button
           onClick={handleConnectMetaMaskButtonClick}
           colorScheme="twitter"
+          display={"none"}
         >
           Connect with Metamask
         </Button>
