@@ -1,4 +1,3 @@
-import { WalletProvider } from "./utils/Context";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Home } from "./components/Home";
 import { Bazar } from "./components/Bazar";
@@ -8,7 +7,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 function App() {
   return (
     <ChakraProvider>
-      <WalletProvider>
+      <UserProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -16,7 +15,7 @@ function App() {
             <Route path="/bazar" element={<Bazar />} />
           </Routes>
         </BrowserRouter>
-      </WalletProvider>
+      </UserProvider>
     </ChakraProvider>
   );
 }
