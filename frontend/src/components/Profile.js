@@ -1,22 +1,30 @@
 import { Flex, Button, Input, Text } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   bazcoinContract,
   bazarContract,
   nftContract,
 } from "../utils/ethersConnect";
-import UserContext from "../utils/UserContext";
+import { useUser } from "../utils/UserContext";
 
 export const Profile = () => {
-  const userAddres = useContext(UserContext);
+  const userAddres = useUser();
   const [depositSum, setDepositSum] = useState("");
   const [myTokens, setMyTokens] = useState([]);
+  const [myBalance, setMyBalance] = useState(0);
 
   useEffect(() => {
     const getMyTokens = async () => {
+      if(!userAddres) return;
       const res = await nftContract.getOwnedNfts(userAddres);
-      console.log("MY TOKENS: ", res);
-      setMyTokens(res);
+      const bazCoinTokens = await bazcoinContract.balanceOf(userAddres)
+      let tokens = [];
+      for(let i = 0; i < res.length; i++){
+        tokens.push(res[i].toString());
+        console.log(res[i].toString());
+      }
+      setMyTokens(tokens);
+      setMyBalance(bazCoinTokens.toString());
     };
 
     getMyTokens();
@@ -77,6 +85,7 @@ export const Profile = () => {
         ) : (
           <>
             {myTokens.map((token, index) => {
+              console.log(token, index);
               return (
                 <Flex
                   direction={"column"}
@@ -87,11 +96,11 @@ export const Profile = () => {
                   border={"1px solid black"}
                   borderRadius={10}
                 >
-                  <Text>{index}</Text>
+                  <Text>{token}</Text>
                   <Button
                     colorScheme="twitter"
                     onClick={() => {
-                      handleSaleNFT(index + 1);
+                      handleSaleNFT(token);
                     }}
                   >
                     Sell
@@ -116,6 +125,9 @@ export const Profile = () => {
           }}
         />
       </Flex>
+      <Button colorScheme="twitter">
+          Balance: { myBalance }
+        </Button>
     </Flex>
   );
 };

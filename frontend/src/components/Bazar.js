@@ -12,17 +12,17 @@ import {
   ModalBody,
   ModalCloseButton,
 } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   bazcoinContract,
   bazarContract,
   nftContract,
 } from "../utils/ethersConnect";
-import UserContext from "../utils/UserContext";
+import { useUser } from "../utils/UserContext";
 
 export const Bazar = () => {
-  const userAddres = useContext(UserContext);
+  const userAddres = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const nav = useNavigate();
   const [bidValue, setBidValue] = useState("");

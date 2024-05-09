@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { ethers } from "ethers";
 
 const UserContext = createContext();
@@ -27,4 +27,4 @@ export const UserProvider = ({ children }) => {
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
 
-export default UserContext;
+export const useUser = () => useContext(UserContext);
