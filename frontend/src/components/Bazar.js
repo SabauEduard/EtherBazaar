@@ -129,7 +129,7 @@ export const Bazar = () => {
                   <Button
                     colorScheme="twitter"
                     onClick={() => {
-                      setCurrentAuction(inedx);
+                      setCurrentAuction(index);
                       onOpen();
                     }}
                   >
