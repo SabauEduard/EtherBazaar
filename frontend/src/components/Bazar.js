@@ -11,6 +11,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Spinner,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,8 @@ export const Bazar = () => {
   const [auctions, setAuctions] = useState([]);
   const [currentAuction, setCurrentAuction] = useState(null);
   const [bidSum, setBidSum] = useState(null);
+  const [gas, setGas] = useState("");
+  const [loadingGas, setLoadingGas] = useState(false);
 
   useEffect(() => {
     const getAuctions = async () => {
@@ -89,14 +92,33 @@ export const Bazar = () => {
           <ModalHeader>Let's enter the auction</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input
-              type="number"
-              width={"200px"}
-              value={bidSum}
-              onChange={(e) => {
-                setBidSum(e.target.value);
-              }}
-            />
+            <Flex direction={"column"} alignItems={"flex-start"} gap={10}>
+              <Input
+                type="number"
+                width={"200px"}
+                value={bidSum}
+                onChange={async (e) => {
+                  setBidSum(e.target.value);
+                  try {
+                    setLoadingGas(true);
+                    let gasEst = await bazarContract.placeBid.estimateGas(
+                      currentAuction,
+                      e.target.value
+                    );
+                    setGas(gasEst);
+                    setLoadingGas(false);
+                  } catch (error) {
+                    alert("Could not estimate gas fee");
+                    console.log(error);
+                    setGas("");
+                  }
+                }}
+              />
+              <Text>
+                Estimate gas:{" "}
+                {loadingGas ? <Spinner size={"xs"} /> : gas.toString()}
+              </Text>
+            </Flex>
           </ModalBody>
 
           <ModalFooter>
