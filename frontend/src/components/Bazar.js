@@ -14,40 +14,41 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  bazcoinContract,
-  bazarContract,
-  nftContract,
-} from "../utils/ethersConnect";
+import { bazcoinContract, bazarContract } from "../utils/ethersConnect";
 import { useUser } from "../utils/UserContext";
 
 export const Bazar = () => {
   const userAddres = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const nav = useNavigate();
-  const [bidValue, setBidValue] = useState("");
   const [auctions, setAuctions] = useState([]);
   const [currentAuction, setCurrentAuction] = useState(null);
   const [bidSum, setBidSum] = useState(null);
 
   useEffect(() => {
     const getAuctions = async () => {
+      if (!userAddres) return;
       const res = await bazarContract.seeValidAuctions();
       console.log("AUCTIONS: ", res);
 
-      setAuctions(res);
+      let tokens = [];
+      for (let i = 0; i < res.length; i++) {
+        tokens.push(res[i].toString());
+      }
+
+      setAuctions(tokens);
     };
 
     getAuctions();
   }, [userAddres]);
 
-  const handleBid = async (auctionId, bidValue = 10) => {
+  const handleBid = async (auctionId, bidValuee = 10) => {
     let tx = await bazcoinContract.approve(
       bazarContract.target,
-      parseInt(bidValue)
+      parseInt(bidValuee)
     );
     await tx.wait();
-    tx = await bazarContract.placeBid(auctionId, parseInt(bidValue));
+    tx = await bazarContract.placeBid(auctionId, parseInt(bidValuee));
     await tx.wait();
 
     console.log("Bid successfully");
@@ -65,8 +66,6 @@ export const Bazar = () => {
         Ether Bazaar
       </Text>
 
-      <Text>Welcome to bazar</Text>
-
       <Modal
         isOpen={isOpen}
         onClose={() => {
@@ -81,7 +80,7 @@ export const Bazar = () => {
           <ModalBody>
             <Input
               type="number"
-              width={"100px"}
+              width={"200px"}
               value={bidSum}
               onChange={(e) => {
                 setBidSum(e.target.value);
@@ -105,7 +104,7 @@ export const Bazar = () => {
       <Flex
         direction={"row"}
         width={"90vw"}
-        gap={5}
+        gap={10}
         alignItems={"center"}
         justify={"center"}
         wrap={"wrap"}
@@ -117,19 +116,20 @@ export const Bazar = () => {
             {auctions.map((auction, index) => {
               return (
                 <Flex
+                  key={index}
                   direction={"column"}
                   alignItems={"center"}
                   justify={"center"}
-                  gap={2}
+                  gap={10}
                   padding={5}
                   border={"1px solid black"}
                   borderRadius={10}
                 >
-                  <Text>{index}</Text>
+                  <Text>Auction ID: #{auction}</Text>
                   <Button
                     colorScheme="twitter"
                     onClick={() => {
-                      setCurrentAuction(index);
+                      setCurrentAuction(auction);
                       onOpen();
                     }}
                   >
@@ -140,20 +140,6 @@ export const Bazar = () => {
             })}
           </>
         )}
-      </Flex>
-
-      <Flex gap={5} width={"100%"} justify={"center"}>
-        <Button colorScheme="twitter" onClick={handleBid}>
-          Bid
-        </Button>
-        <Input
-          type="number"
-          width={"100px"}
-          value={bidValue}
-          onChange={(e) => {
-            setBidValue(e.target.value);
-          }}
-        />
       </Flex>
 
       <Button

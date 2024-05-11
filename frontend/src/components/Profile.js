@@ -6,22 +6,23 @@ import {
   nftContract,
 } from "../utils/ethersConnect";
 import { useUser } from "../utils/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export const Profile = () => {
   const userAddres = useUser();
+  const nav = useNavigate();
   const [depositSum, setDepositSum] = useState("");
   const [myTokens, setMyTokens] = useState([]);
   const [myBalance, setMyBalance] = useState(0);
 
   useEffect(() => {
     const getMyTokens = async () => {
-      if(!userAddres) return;
+      if (!userAddres) return;
       const res = await nftContract.getOwnedNfts(userAddres);
-      const bazCoinTokens = await bazcoinContract.balanceOf(userAddres)
+      const bazCoinTokens = await bazcoinContract.balanceOf(userAddres);
       let tokens = [];
-      for(let i = 0; i < res.length; i++){
+      for (let i = 0; i < res.length; i++) {
         tokens.push(res[i].toString());
-        console.log(res[i].toString());
       }
       setMyTokens(tokens);
       setMyBalance(bazCoinTokens.toString());
@@ -72,62 +73,77 @@ export const Profile = () => {
       justify={"space-evenly"}
       direction={"column"}
     >
-      <Flex
-        direction={"row"}
-        width={"90vw"}
-        gap={5}
-        alignItems={"center"}
-        justify={"center"}
-        wrap={"wrap"}
-      >
-        {myTokens.length === 0 ? (
-          <Text>You have no NFTs for now</Text>
-        ) : (
-          <>
-            {myTokens.map((token, index) => {
-              console.log(token, index);
-              return (
-                <Flex
-                  direction={"column"}
-                  alignItems={"center"}
-                  justify={"center"}
-                  gap={2}
-                  padding={5}
-                  border={"1px solid black"}
-                  borderRadius={10}
-                >
-                  <Text>{token}</Text>
-                  <Button
-                    colorScheme="twitter"
-                    onClick={() => {
-                      handleSaleNFT(token);
-                    }}
+      <Text fontSize={60} fontWeight={700}>
+        Profile
+      </Text>
+
+      <Flex direction={"column"} alignItems={"center"} gap={5}>
+        <Text>Tokens available to sell:</Text>
+        <Flex
+          direction={"row"}
+          width={"90vw"}
+          gap={10}
+          alignItems={"center"}
+          justify={"center"}
+          wrap={"wrap"}
+        >
+          {myTokens.length === 0 ? (
+            <Text>You have no NFTs for now</Text>
+          ) : (
+            <>
+              {myTokens.map((token, index) => {
+                return (
+                  <Flex
+                    key={index}
+                    direction={"column"}
+                    alignItems={"center"}
+                    justify={"center"}
+                    gap={10}
+                    padding={5}
+                    border={"1px solid black"}
+                    borderRadius={10}
                   >
-                    Sell
-                  </Button>
-                </Flex>
-              );
-            })}
-          </>
-        )}
+                    <Text>Token ID: #{token}</Text>
+                    <Button
+                      colorScheme="twitter"
+                      onClick={() => {
+                        handleSaleNFT(token);
+                      }}
+                    >
+                      Sell
+                    </Button>
+                  </Flex>
+                );
+              })}
+            </>
+          )}
+        </Flex>
       </Flex>
 
-      <Flex gap={5} width={"100%"} justify={"center"}>
-        <Button colorScheme="twitter" onClick={handleDepositBazcoin}>
-          Deposit BazCoin
-        </Button>
-        <Input
-          type="number"
-          width={"100px"}
-          value={depositSum}
-          onChange={(e) => {
-            setDepositSum(e.target.value);
-          }}
-        />
+      <Flex direction={"column"} alignItems={"center"} gap={5} width={"100%"}>
+        <Button>Balance: {myBalance}</Button>
+        <Flex gap={5} width={"100%"} justify={"center"}>
+          <Input
+            type="number"
+            width={"100px"}
+            value={depositSum}
+            onChange={(e) => {
+              setDepositSum(e.target.value);
+            }}
+          />
+          <Button colorScheme="twitter" onClick={handleDepositBazcoin}>
+            Deposit BazCoin
+          </Button>
+        </Flex>
       </Flex>
-      <Button colorScheme="twitter">
-          Balance: { myBalance }
-        </Button>
+
+      <Button
+        onClick={() => {
+          nav("/bazar");
+        }}
+      >
+        Bazar
+      </Button>
     </Flex>
   );
 };
