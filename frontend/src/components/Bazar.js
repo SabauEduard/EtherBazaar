@@ -28,30 +28,41 @@ export const Bazar = () => {
   useEffect(() => {
     const getAuctions = async () => {
       if (!userAddres) return;
-      const res = await bazarContract.seeValidAuctions();
-      console.log("AUCTIONS: ", res);
 
-      let tokens = [];
-      for (let i = 0; i < res.length; i++) {
-        tokens.push(res[i].toString());
+      try {
+        const res = await bazarContract.seeValidAuctions();
+        console.log("AUCTIONS: ", res);
+
+        let tokens = [];
+        for (let i = 0; i < res.length; i++) {
+          tokens.push(res[i].toString());
+        }
+
+        setAuctions(tokens);
+      } catch (error) {
+        alert("Could not get auctions.");
+        console.log(error);
       }
-
-      setAuctions(tokens);
     };
 
     getAuctions();
   }, [userAddres]);
 
   const handleBid = async (auctionId, bidValuee = 10) => {
-    let tx = await bazcoinContract.approve(
-      bazarContract.target,
-      parseInt(bidValuee)
-    );
-    await tx.wait();
-    tx = await bazarContract.placeBid(auctionId, parseInt(bidValuee));
-    await tx.wait();
+    try {
+      let tx = await bazcoinContract.approve(
+        bazarContract.target,
+        parseInt(bidValuee)
+      );
+      await tx.wait();
+      tx = await bazarContract.placeBid(auctionId, parseInt(bidValuee));
+      await tx.wait();
 
-    console.log("Bid successfully");
+      console.log("Bid successfully");
+    } catch (error) {
+      alert("Could not place bid.");
+      console.log(error);
+    }
   };
 
   return (

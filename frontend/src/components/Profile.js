@@ -18,14 +18,20 @@ export const Profile = () => {
   useEffect(() => {
     const getMyTokens = async () => {
       if (!userAddres) return;
-      const res = await nftContract.getOwnedNfts(userAddres);
-      const bazCoinTokens = await bazcoinContract.balanceOf(userAddres);
-      let tokens = [];
-      for (let i = 0; i < res.length; i++) {
-        tokens.push(res[i].toString());
+
+      try {
+        const res = await nftContract.getOwnedNfts(userAddres);
+        const bazCoinTokens = await bazcoinContract.balanceOf(userAddres);
+        let tokens = [];
+        for (let i = 0; i < res.length; i++) {
+          tokens.push(res[i].toString());
+        }
+        setMyTokens(tokens);
+        setMyBalance(bazCoinTokens.toString());
+      } catch (error) {
+        alert("Could not get my tokens.");
+        console.log(error);
       }
-      setMyTokens(tokens);
-      setMyBalance(bazCoinTokens.toString());
     };
 
     getMyTokens();
@@ -39,6 +45,7 @@ export const Profile = () => {
       await tx.wait();
       console.log("All good deposit");
     } catch (error) {
+      alert("Could not deposit");
       console.log("Error on deposit", error);
     }
   };
@@ -47,22 +54,27 @@ export const Profile = () => {
     console.log(userAddres);
     console.log(bazarContract);
 
-    // Owner approves the bazaar to spend the NFT
-    let tx = await nftContract.approve(bazarContract.target, tokenId);
-    await tx.wait();
-    console.log("Owner approved the bazaar to spend the NFT");
+    try {
+      // Owner approves the bazaar to spend the NFT
+      let tx = await nftContract.approve(bazarContract.target, tokenId);
+      await tx.wait();
+      console.log("Owner approved the bazaar to spend the NFT");
 
-    // Owner puts the NFT for sale
-    tx = await bazarContract.startAuction(
-      nftContract.target,
-      tokenId,
-      0,
-      120,
-      5
-    );
-    await tx.wait();
+      // Owner puts the NFT for sale
+      tx = await bazarContract.startAuction(
+        nftContract.target,
+        tokenId,
+        0,
+        120,
+        5
+      );
+      await tx.wait();
 
-    console.log("Owner put the NFT for sale");
+      console.log("Owner put the NFT for sale");
+    } catch (error) {
+      alert("Could not put token to sell.");
+      console.log(error);
+    }
   };
 
   return (
