@@ -17,16 +17,41 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { bazcoinContract, bazarContract } from "../utils/ethersConnect";
 import { useUser } from "../utils/UserContext";
+import moment, { now } from "moment";
+import myBackgroundImage from "./fundal.jpg";
+
+//dummy auction for testing
+// {
+//     0: "tokenContract",
+//     1: "id",
+//     2: "seller",
+//     3: "1715675909",
+//     4: "1715683109",
+//     5: "5",
+//     6: "highestBidder",
+//     7: "234",
+//     8: "Settled",
+//   }
 
 export const Bazar = () => {
   const userAddres = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const nav = useNavigate();
   const [auctions, setAuctions] = useState([]);
-  const [currentAuction, setCurrentAuction] = useState(null);
-  const [bidSum, setBidSum] = useState(null);
+  const [currentAuction, setCurrentAuction] = useState("");
+  const [currentAuctionDetails, setCurrentAuctionDetails] = useState(null);
+  const [bidSum, setBidSum] = useState("");
   const [gas, setGas] = useState("");
   const [loadingGas, setLoadingGas] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [amountConfirmed, setAmountConfirmed] = useState(false);
+
+  bazarContract.on("BidPlaced", (auctionId, bidder, amount) => {
+    alert(
+      `Bid placed successfully on auction #${auctionId} with amount ${amount}.`
+    );
+    window.location.reload();
+  });
 
   useEffect(() => {
     const getAuctions = async () => {
@@ -55,12 +80,10 @@ export const Bazar = () => {
 
   const handleBid = async (auctionId, bidValuee = 10) => {
     try {
-      let tx = await bazcoinContract.approve(
-        bazarContract.target,
-        parseInt(bidValuee)
-      );
-      await tx.wait();
-      tx = await bazarContract.placeBid(auctionId, parseInt(bidValuee));
+      let tx =
+        userAddres === currentAuctionDetails[6]
+          ? await bazarContract.addToBid(auctionId, parseInt(bidValuee))
+          : await bazarContract.placeBid(auctionId, parseInt(bidValuee));
       await tx.wait();
 
       console.log("Bid successfully");
@@ -74,57 +97,139 @@ export const Bazar = () => {
     <Flex
       flex={1}
       height={"100vh"}
-      alignItems={"center"}
-      justify={"space-evenly"}
+      width={"100%"}
+      alignItems={"flex-start"}
+      justify={"flex-start"}
       direction={"column"}
+      gap={20}
+      padding={10}
+      backgroundImage={`url(${myBackgroundImage})`}
+      backgroundSize="cover"
+      backgroundPosition="center"
     >
-      <Text fontSize={60} fontWeight={700}>
+      <Text fontSize={60} fontWeight={700} color={"#605d58"}>
         Ether Bazaar
       </Text>
 
       <Modal
+        isCentered
         isOpen={isOpen}
         onClose={() => {
-          setCurrentAuction(null);
+          setCurrentAuction("");
+          setCurrentAuctionDetails(null);
           onClose();
         }}
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Let's enter the auction</ModalHeader>
+          <ModalHeader>Auction Id: #{currentAuction}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Flex direction={"column"} alignItems={"flex-start"} gap={10}>
-              <Input
-                type="number"
-                width={"200px"}
-                value={bidSum}
-                onChange={async (e) => {
-                  setBidSum(e.target.value);
-                  try {
-                    setLoadingGas(true);
-                    let gasEst = await bazarContract.placeBid.estimateGas(
-                      currentAuction,
-                      e.target.value
-                    );
-                    setGas(gasEst);
-                    setLoadingGas(false);
-                  } catch (error) {
-                    alert("Could not estimate gas fee");
-                    console.log(error);
-                    setGas("");
-                  }
-                }}
-              />
-              <Text>
-                Estimate gas:{" "}
-                {loadingGas ? <Spinner size={"xs"} /> : gas.toString()}
+            <Flex
+              direction={"column"}
+              alignItems={"center"}
+              justifyContent={"center"}
+              width={"100%"}
+              gap={5}
+              pb={10}
+            >
+              <Flex
+                justify={"center"}
+                alignItems={"center"}
+                width={"100%"}
+                gap={5}
+              >
+                <Flex
+                  gap={2}
+                  backgroundColor={"#114B5F"}
+                  borderRadius={"10"}
+                  padding={5}
+                  color={"white"}
+                >
+                  <Text fontWeight={700}>End:</Text>
+                  <Text
+                    fontWeight={400}
+                    color={
+                      moment.unix(currentAuctionDetails[4]).isBefore(now)
+                        ? "red"
+                        : "white"
+                    }
+                  >
+                    {moment
+                      .unix(currentAuctionDetails[4])
+                      .format("HH:mm DD.MM.YYYY")
+                      .toLocaleString()}
+                  </Text>
+                </Flex>
+                <Flex
+                  gap={2}
+                  backgroundColor={"#456990"}
+                  borderRadius={"10"}
+                  padding={5}
+                  color={"white"}
+                >
+                  <Text fontWeight={700}>Minimum:</Text>
+                  <Text fontWeight={400}>{currentAuctionDetails[5]}</Text>
+                </Flex>
+              </Flex>
+              <Text fontWeight={700} fontSize={36}>
+                Highest Bidder: {currentAuctionDetails[7]}
               </Text>
+              <Flex
+                direction={"column"}
+                alignItems={"center"}
+                gap={2}
+                width={"100%"}
+              >
+                <Input
+                  placeholder="Enter sum to bid"
+                  type="number"
+                  width={"200px"}
+                  value={bidSum}
+                  onChange={(e) => {
+                    setBidSum(e.target.value);
+                  }}
+                />
+                <Text>
+                  Estimate gas:{" "}
+                  {loadingGas ? <Spinner size={"xs"} /> : gas.toString()}
+                </Text>
+              </Flex>
             </Flex>
           </ModalBody>
 
-          <ModalFooter>
+          <ModalFooter gap={5}>
             <Button
+              isLoading={loadingGas}
+              onClick={async () => {
+                setLoadingGas(true);
+                try {
+                  let tx = await bazcoinContract.approve(
+                    bazarContract.target,
+                    parseInt(bidSum)
+                  );
+                  await tx.wait();
+                  console.log("APPROVED");
+
+                  let gasEst = await bazarContract.placeBid.estimateGas(
+                    currentAuction,
+                    bidSum
+                  );
+                  setGas(gasEst);
+                  setLoadingGas(false);
+                  setAmountConfirmed(true);
+                } catch (error) {
+                  setLoadingGas(false);
+                  setGas("");
+                  alert("Something went wrong");
+                  console.log(error);
+                }
+              }}
+            >
+              Confirm amount
+            </Button>
+            <Button
+              isDisabled={!amountConfirmed}
               colorScheme="twitter"
               onClick={() => {
                 handleBid(currentAuction, bidSum);
@@ -157,18 +262,26 @@ export const Bazar = () => {
                   justify={"center"}
                   gap={10}
                   padding={5}
-                  border={"1px solid black"}
                   borderRadius={10}
+                  backgroundColor={"rgba(255, 255, 255, 0.2)"}
+                  backdropFilter={"blur(10px)"}
                 >
-                  <Text>Auction ID: #{auction}</Text>
+                  <Text fontWeight={700} color={"white"}>
+                    Auction ID: #{auction}
+                  </Text>
                   <Button
-                    colorScheme="twitter"
-                    onClick={() => {
+                    isLoading={loadingDetails}
+                    // colorScheme="twitter"
+                    onClick={async () => {
                       setCurrentAuction(auction);
+                      setLoadingDetails(true);
+                      let details = await bazarContract.seeAuction(auction);
+                      setCurrentAuctionDetails(details);
+                      setLoadingDetails(false);
                       onOpen();
                     }}
                   >
-                    Bid
+                    Details
                   </Button>
                 </Flex>
               );
@@ -178,6 +291,9 @@ export const Bazar = () => {
       </Flex>
 
       <Button
+        position={"absolute"}
+        top={10}
+        right={10}
         onClick={() => {
           nav("/profile");
         }}
