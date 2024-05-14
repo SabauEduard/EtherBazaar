@@ -35,6 +35,8 @@ export const Bazar = () => {
       try {
         const res = await bazarContract.seeValidAuctions();
         console.log("AUCTIONS: ", res);
+        const oneAuction = await bazarContract.seeAuction(0);
+        console.log("ONE AUCTION: ", oneAuction);
 
         let tokens = [];
         for (let i = 0; i < res.length; i++) {
