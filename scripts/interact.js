@@ -3,6 +3,9 @@ const { ethers } = require("hardhat");
 
 async function deploy() {
     [owner, user1, user2] = await ethers.getSigners();
+    console.log("Owner: ", owner.address);
+    console.log("User1: ", user1.address);
+    console.log("User2: ", user2.address);
 
     let deployedTokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     let token = await ethers.getContractAt("BazCoin", deployedTokenAddress)

@@ -102,6 +102,10 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         return userAuctions[_user];
     }
 
+    function seeAuction(uint256 _auctionId) external view returns(Auction memory) {
+        return auctions[_auctionId];
+    }
+
     function seeValidAuctions() external view returns(uint256[] memory) {
         uint256[] memory validAuctionsArray = new uint256[](auctionCounter);
         uint256 validAuctionsCounter = 0;
