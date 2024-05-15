@@ -81,7 +81,7 @@ export const Bazar = () => {
   const handleBid = async (auctionId, bidValuee = 10) => {
     try {
       let tx =
-        userAddres === currentAuctionDetails[6]
+        userAddres === currentAuctionDetails?.[6]
           ? await bazarContract.addToBid(auctionId, parseInt(bidValuee))
           : await bazarContract.placeBid(auctionId, parseInt(bidValuee));
       await tx.wait();
@@ -150,13 +150,13 @@ export const Bazar = () => {
                   <Text
                     fontWeight={400}
                     color={
-                      moment.unix(currentAuctionDetails[4]).isBefore(now)
+                      moment.unix(currentAuctionDetails?.[4]).isBefore(now)
                         ? "red"
                         : "white"
                     }
                   >
                     {moment
-                      .unix(currentAuctionDetails[4])
+                      .unix(currentAuctionDetails?.[4])
                       .format("HH:mm DD.MM.YYYY")
                       .toLocaleString()}
                   </Text>
@@ -169,11 +169,11 @@ export const Bazar = () => {
                   color={"white"}
                 >
                   <Text fontWeight={700}>Minimum:</Text>
-                  <Text fontWeight={400}>{currentAuctionDetails[5]}</Text>
+                  <Text fontWeight={400}>{currentAuctionDetails?.[5]}</Text>
                 </Flex>
               </Flex>
               <Text fontWeight={700} fontSize={36}>
-                Highest Bidder: {currentAuctionDetails[7]}
+                Highest Bidder: {currentAuctionDetails?.[7]}
               </Text>
               <Flex
                 direction={"column"}
