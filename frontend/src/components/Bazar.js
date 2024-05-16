@@ -46,13 +46,6 @@ export const Bazar = () => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [amountConfirmed, setAmountConfirmed] = useState(false);
 
-  bazarContract.on("BidPlaced", (auctionId, bidder, amount) => {
-    alert(
-      `Bid placed successfully on auction #${auctionId} with amount ${amount}.`
-    );
-    window.location.reload();
-  });
-
   useEffect(() => {
     const getAuctions = async () => {
       if (!userAddres) return;
@@ -78,10 +71,19 @@ export const Bazar = () => {
     getAuctions();
   }, [userAddres]);
 
+  useEffect(() => {
+    bazarContract.on("BidPlaced", (auctionId, bidder, amount) => {
+      alert(
+        `Bid placed successfully on auction #${auctionId} with amount ${amount}.`
+      );
+      window.location.reload();
+    });
+  }, []);
+
   const handleBid = async (auctionId, bidValuee = 10) => {
     try {
       let tx =
-        userAddres === currentAuctionDetails?.[6]
+        userAddres === currentAuctionDetails?.[6].toString()
           ? await bazarContract.addToBid(auctionId, parseInt(bidValuee))
           : await bazarContract.placeBid(auctionId, parseInt(bidValuee));
       await tx.wait();
@@ -150,13 +152,13 @@ export const Bazar = () => {
                   <Text
                     fontWeight={400}
                     color={
-                      moment.unix(currentAuctionDetails?.[4]).isBefore(now)
+                      moment.unix(currentAuctionDetails?.[4].toString()).isBefore(now)
                         ? "red"
                         : "white"
                     }
                   >
                     {moment
-                      .unix(currentAuctionDetails?.[4])
+                      .unix(currentAuctionDetails?.[4].toString())
                       .format("HH:mm DD.MM.YYYY")
                       .toLocaleString()}
                   </Text>
@@ -169,11 +171,11 @@ export const Bazar = () => {
                   color={"white"}
                 >
                   <Text fontWeight={700}>Minimum:</Text>
-                  <Text fontWeight={400}>{currentAuctionDetails?.[5]}</Text>
+                  <Text fontWeight={400}>{currentAuctionDetails?.[5].toString()}</Text>
                 </Flex>
               </Flex>
               <Text fontWeight={700} fontSize={36}>
-                Highest Bidder: {currentAuctionDetails?.[7]}
+                Highest Bid: {currentAuctionDetails?.[7].toString()}
               </Text>
               <Flex
                 direction={"column"}
@@ -210,11 +212,17 @@ export const Bazar = () => {
                   );
                   await tx.wait();
                   console.log("APPROVED");
-
-                  let gasEst = await bazarContract.placeBid.estimateGas(
-                    currentAuction,
-                    bidSum
-                  );
+                  let gasEst;
+                  if (userAddres === currentAuctionDetails?.[6].toString())
+                    gasEst = await bazarContract.addToBid.estimateGas(
+                      currentAuction,
+                      bidSum
+                    );
+                  else
+                    gasEst = await bazarContract.placeBid.estimateGas(
+                      currentAuction,
+                      bidSum
+                    );
                   setGas(gasEst);
                   setLoadingGas(false);
                   setAmountConfirmed(true);
