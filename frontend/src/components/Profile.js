@@ -35,11 +35,6 @@ export const Profile = () => {
   const [minBid, setMinBid] = useState("");
   const [duration, setDuration] = useState("");
 
-  bazarContract.on("AuctionCreated", (auctionId, token, tokenId, seller) => {
-    alert(`Auction with ID #${auctionId} created successfully.`);
-    window.location.reload();
-  });
-
   useEffect(() => {
     const getMyTokens = async () => {
       if (!userAddres) return;
@@ -61,6 +56,18 @@ export const Profile = () => {
 
     getMyTokens();
   }, [userAddres]);
+
+  useEffect(() => {
+    bazarContract.on("AuctionCreated", (auctionId, token, tokenId, seller) => {
+      alert(`Auction with ID #${auctionId} created successfully.`);
+      window.location.reload();
+    });
+
+    bazcoinContract.on("TokensDeposited", () => {
+      alert(`Deposit successfully!`);
+      window.location.reload();
+    });
+  }, []);
 
   const handleDepositBazcoin = async () => {
     try {
