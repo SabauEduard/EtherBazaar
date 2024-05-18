@@ -111,7 +111,7 @@ contract EtherBazaar is IERC721Receiver, Ownable {
         uint256 validAuctionsCounter = 0;
 
         for(uint256 i = 0; i < auctionCounter; i++) {
-            if(block.timestamp >= auctions[i].startTime && block.timestamp < auctions[i].endTime && !auctions[i].settled) {
+            if(block.timestamp >= auctions[i].startTime && !auctions[i].settled) {
                 validAuctionsArray[validAuctionsCounter] = i;
                 validAuctionsCounter++;
             }

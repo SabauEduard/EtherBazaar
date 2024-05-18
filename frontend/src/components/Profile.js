@@ -97,7 +97,7 @@ export const Profile = () => {
         nftContract.target,
         tokenId,
         0,
-        120,
+        duration,
         +minBid
       );
       await tx.wait();

@@ -38,56 +38,7 @@ export const Bazar = () => {
   const userAddres = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const nav = useNavigate();
-  const [auctions, setAuctions] = useState([
-    {
-      id: 4,
-      0: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      1: "id",
-      2: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      3: "1715675909",
-      4: "1715683109",
-      5: "5",
-      6: "highestBidder",
-      7: "234",
-      8: "Settled",
-    },
-    {
-      id: 4,
-      0: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      1: "id",
-      2: "seller",
-      3: "1715675909",
-      4: "1715683109",
-      5: "5",
-      6: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      7: "234",
-      8: "Settled",
-    },
-    {
-      id: 4,
-      0: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      1: "id",
-      2: "seller",
-      3: "1715675909",
-      4: "1715683109",
-      5: "5",
-      6: "highestBidder",
-      7: "234",
-      8: "Settled",
-    },
-    {
-      id: 4,
-      0: "0x7DCe2Dee4E504f61cC8efB3A1D75BE2f8Cc55035",
-      1: "id",
-      2: "seller",
-      3: "1715675909",
-      4: "1715683109",
-      5: "5",
-      6: "highestBidder",
-      7: "234",
-      8: "Settled",
-    },
-  ]);
+  const [auctions, setAuctions] = useState([]);
   const [currentAuctionDetails, setCurrentAuctionDetails] = useState(null);
   const [bidSum, setBidSum] = useState("");
   const [gas, setGas] = useState("");
@@ -218,14 +169,12 @@ export const Bazar = () => {
                   <Text
                     fontWeight={400}
                     color={
-                      moment
-                        .unix(currentAuctionDetails?.[4].toString())
-                        .isBefore(moment())
-                        ? "red"
-                        : "white"
+                      "white"
                     }
                   >
                     {moment
+                        .unix(currentAuctionDetails?.[4].toString())
+                        .isBefore(moment()) ? "Finished": moment
                       .unix(currentAuctionDetails?.[4].toString())
                       .format("HH:mm DD.MM.YYYY")
                       .toLocaleString()}
@@ -247,7 +196,8 @@ export const Bazar = () => {
               <Text fontWeight={700} fontSize={36}>
                 Highest Bid: {currentAuctionDetails?.[7].toString()}
               </Text>
-              {moment
+              {currentAuctionDetails?.[2] !== userAddres &&
+              moment
                 .unix(currentAuctionDetails?.[4].toString())
                 .isAfter(moment()) && (
                 <Flex
@@ -275,7 +225,7 @@ export const Bazar = () => {
                 {moment
                   .unix(currentAuctionDetails?.[4].toString())
                   .isBefore(moment())
-                  ? currentAuctionDetails?.[2] === userAddres
+                  ? currentAuctionDetails?.[2] === userAddres && currentAuctionDetails?.[7].toString() === "0"
                     ? "NO BUYER :("
                     : currentAuctionDetails?.[6] === userAddres
                     ? "YOU WON THE AUCTION"
@@ -310,7 +260,7 @@ export const Bazar = () => {
                 </Button>
               )}
             </ModalFooter>
-          ) : (
+          ) : currentAuctionDetails?.[2] !== userAddres ? (
             <ModalFooter gap={5}>
               <Button
                 isLoading={loadingGas}
@@ -359,7 +309,7 @@ export const Bazar = () => {
                   : "Bid"}
               </Button>
             </ModalFooter>
-          )}
+          ) : null}
         </ModalContent>
       </Modal>
 
@@ -462,11 +412,21 @@ const AuctionRowComponent = (props) => {
 
                   <Flex direction={"column"} alignItems={"center"} gap={1}>
                     <Text fontWeight={500} color={"white"}>
+                      Token Id
+                    </Text>
+
+                    <Text fontWeight={900} color={"white"} fontSize={24}>
+                      {auction?.[1].toString()}
+                    </Text>
+                  </Flex>
+
+                  <Flex direction={"column"} alignItems={"center"} gap={1}>
+                    <Text fontWeight={500} color={"white"}>
                       Highest Bid
                     </Text>
 
                     <Text fontWeight={900} color={"white"} fontSize={24}>
-                      {auction?.[7]}
+                      {auction?.[7].toString()}
                     </Text>
                   </Flex>
 
